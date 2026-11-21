@@ -1,0 +1,6 @@
+{
+  "name": "FrameForge",
+  "description": "Precision HTML & CSS web animation studio renderer supporting 4K horizontal, 4K vertical, ultrawide, and super ultrawide exports at 60–120 Mbps.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
