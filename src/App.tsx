@@ -316,6 +316,13 @@ export default function App() {
         // Preserve high-confidence virtual-clock probe results (e.g. detected 1-cycle loop or finite DOM/rAF)
         if (prev && prev.confidence === 'high' && !isGsap) return prev;
         if (prev && prev.durationSeconds >= seconds - 0.05 && !isGsap) return prev;
+        // If static analysis already detected an explicit JS timeline or constant,
+        // and preview runtime only detected ambient short CSS loops (hasInfinite), do not let it override!
+        const hasStaticJsConstant = analysis.duration.breakdown.some(
+          (b) => b.source === 'js' && /^JS (?:TOTAL_|ANIMATION_|VIDEO_|LOOP_|CYCLE_|SCENE_|DURATION|rAF)/i.test(b.name)
+        );
+        if (hasStaticJsConstant && hasInfinite) return prev;
+
         return {
           durationSeconds: seconds,
           source: isGsap
@@ -338,7 +345,7 @@ export default function App() {
         };
       });
     },
-    []
+    [analysis.duration.breakdown]
   );
 
   // Poll active server render job status (skip local GPU jobs)

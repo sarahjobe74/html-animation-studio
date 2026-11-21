@@ -1504,12 +1504,21 @@ export function mergeStaticAndRuntimeDuration(
     };
   }
 
+  // 4b. When static analysis identified a high-confidence JS duration constant (e.g. TOTAL_DURATION = 10000ms / 20000ms),
+  // NEVER let an ambient CSS loop (like dotPulse 1.2s or pulse 0.8s) from runtime probe downgrade or shorten it!
+  const hasAuthoritativeJsConstant = staticResult.breakdown.some(
+    (b) => b.source === 'js' && /^JS (?:TOTAL_|ANIMATION_|VIDEO_|LOOP_|CYCLE_|SCENE_|DURATION|totalDuration|animationDuration|videoDuration|durationMs|durationSec|rAF Cycle|rAF Progress)/i.test(b.name)
+  );
+  if (hasAuthoritativeJsConstant && runtimeResult.hasInfiniteOnly) {
+    return staticResult;
+  }
+
   // 5. High-confidence live runtime measurement (actual DOM animations, WAAPI, or finite rAF stop)
   //    supersedes static regex BOTH when longer (e.g., JS-staggered delays) AND when shorter
   //    (e.g., static matched unused CSS classes or over-added heuristic transitions).
   if (runtimeResult.confidence === 'high' && !runtimeResult.hasInfiniteOnly) {
-    const hasExplicitJsConstant = staticResult.breakdown.some(
-      (b) => b.source === 'js' && /^JS (?:TOTAL_|ANIMATION_|VIDEO_|LOOP_|CYCLE_|DURATION|totalDuration|animationDuration|videoDuration|durationMs|durationSec|Scene Timeline|Frame Budget)/i.test(b.name)
+    const hasExplicitJsConstant = hasAuthoritativeJsConstant || staticResult.breakdown.some(
+      (b) => b.source === 'js' && /^JS (?:Scene Timeline|Frame Budget)/i.test(b.name)
     );
     if (!hasExplicitJsConstant || rtSec > staticResult.durationSeconds + 0.05) {
       return {
