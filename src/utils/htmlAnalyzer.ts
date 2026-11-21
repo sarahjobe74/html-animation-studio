@@ -401,14 +401,19 @@ export function detectHtmlDimensions(html: string): DimensionDetectionResult {
     };
   }
 
-  // Fallback when HTML uses purely responsive 100vw/100vh without fixed pixel dimensions
-  const fallbackWidth = 1920;
-  const fallbackHeight = 1080;
+  // Fallback when HTML uses purely responsive 100vw/100vh without fixed pixel dimensions.
+  // If the title or comments explicitly specify 4K (e.g., '4K 60fps Broadcast Overlay', '3840x2160'),
+  // prefer 3840×2160 UHD over 1920×1080.
+  const has4kIntent = /(?:<title>[^<]*4K[^<]*<\/title>|<!--[\s\S]*?(?:3840\s*x\s*2160|4K\s*(?:60fps)?\s*(?:Broadcast|UHD|Overlay|Animation)|Native\s*at\s*4K)[\s\S]*?-->|\b3840\s*x\s*2160\b)/i.test(html);
+  const fallbackWidth = has4kIntent ? 3840 : 1920;
+  const fallbackHeight = has4kIntent ? 2160 : 1080;
   const classified = classifyVideoFormat(fallbackWidth, fallbackHeight);
   return {
     width: fallbackWidth,
     height: fallbackHeight,
-    source: 'Responsive viewport fallback (1920×1080)',
+    source: has4kIntent
+      ? 'Responsive 4K viewport (3840×2160 UHD)'
+      : 'Responsive viewport fallback (1920×1080)',
     isExplicit: false,
     ...classified,
   };
