@@ -325,7 +325,25 @@ async function resolveSupportedEncoderConfig(
 }
 
 function prepareLocalRenderHtml(rawHtml: string, width: number, height: number): string {
-  const resetCss = `<style data-frameforge-local-reset="true">html,body{margin:0!important;padding:0!important;width:${width}px!important;height:${height}px!important;overflow:hidden!important;}</style>`;
+  // Enforce explicit fixed dimensions on html, body, and all common stage containers
+  // Viewport units (100vw/100vh) inside SVG foreignObject resolve against the host window,
+  // NOT the foreignObject! Forcing explicit pixels fixes alignment and centering issues.
+  const resetCss = `<style data-frameforge-local-reset="true">
+    html, body, #stage, .stage, #viewport-container, [id*="stage"], [class*="stage"], [class*="container"] {
+      width: ${width}px !important;
+      height: ${height}px !important;
+      min-width: ${width}px !important;
+      min-height: ${height}px !important;
+      max-width: ${width}px !important;
+      max-height: ${height}px !important;
+      box-sizing: border-box !important;
+    }
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+    }
+  </style>`;
   if (/<head[^>]*>/i.test(rawHtml)) {
     return rawHtml.replace(/<head[^>]*>/i, (m) => `${m}\n${LOCAL_VIRTUAL_CLOCK_SCRIPT}\n${resetCss}`);
   }
