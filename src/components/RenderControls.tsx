@@ -249,51 +249,125 @@ export function RenderControls({
 
         {/* Manual Override Inputs (hidden unless toggled) */}
         {isManualOverride && (
-          <div className="mt-4 space-y-3 border-t border-white/[0.08] pt-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label htmlFor="override-width" className="block text-[11px] text-slate-400 mb-1">
-                  {t.widthPx}
-                </label>
-                <input
-                  id="override-width"
-                  type="number"
-                  min={16}
-                  max={7680}
-                  value={effectiveWidth}
-                  onChange={(e) =>
-                    onChangeManualDimensions(
-                      Math.max(16, Number(e.target.value) || effectiveWidth),
-                      effectiveHeight
-                    )
-                  }
-                  className="w-full rounded-lg border border-white/15 bg-[#0B0D11] px-3 py-1.5 font-mono text-xs text-slate-100 focus:border-blue-500 focus:outline-none"
-                />
-              </div>
-              <div>
-                <label htmlFor="override-height" className="block text-[11px] text-slate-400 mb-1">
-                  {t.heightPx}
-                </label>
-                <input
-                  id="override-height"
-                  type="number"
-                  min={16}
-                  max={4320}
-                  value={effectiveHeight}
-                  onChange={(e) =>
-                    onChangeManualDimensions(
-                      effectiveWidth,
-                      Math.max(16, Number(e.target.value) || effectiveHeight)
-                    )
-                  }
-                  className="w-full rounded-lg border border-white/15 bg-[#0B0D11] px-3 py-1.5 font-mono text-xs text-slate-100 focus:border-blue-500 focus:outline-none"
-                />
+          <div className="mt-4 space-y-4 border-t border-white/[0.08] pt-4">
+            {/* Quick Dimension Presets */}
+            <div>
+              <span className="block text-[11px] font-medium text-slate-300 mb-2">
+                {lang === 'en' ? 'Quick Resolution Presets' : 'কুইক রেজোলিউশন প্রিসেট'}
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                {[
+                  { label: '4K Horizontal', sub: '3840×2160 (16:9)', w: 3840, h: 2160 },
+                  { label: '4K Vertical', sub: '2160×3840 (9:16)', w: 2160, h: 3840 },
+                  { label: '4K Square', sub: '2160×2160 (1:1)', w: 2160, h: 2160 },
+                  { label: 'Ultrawide', sub: '3440×1440 (21:9)', w: 3440, h: 1440 },
+                  { label: 'Super Ultrawide', sub: '5120×1440 (32:9)', w: 5120, h: 1440 },
+                  { label: 'Full HD', sub: '1920×1080 (16:9)', w: 1920, h: 1080 },
+                ].map((preset) => {
+                  const isSelected = effectiveWidth === preset.w && effectiveHeight === preset.h;
+                  return (
+                    <button
+                      key={preset.label}
+                      type="button"
+                      onClick={() => onChangeManualDimensions(preset.w, preset.h)}
+                      className={`flex flex-col items-start rounded-lg border px-2.5 py-1.5 text-left transition-colors cursor-pointer ${
+                        isSelected
+                          ? 'border-blue-500 bg-blue-500/15 text-blue-300 ring-1 ring-blue-500'
+                          : 'border-white/10 bg-[#0B0D11] text-slate-300 hover:border-white/20 hover:bg-white/5'
+                      }`}
+                    >
+                      <span className="text-[11px] font-semibold tracking-tight">{preset.label}</span>
+                      <span className="text-[9px] font-mono text-slate-400">{preset.sub}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
+            {/* Custom Width & Height Inputs */}
             <div>
-              <label htmlFor="override-duration" className="block text-[11px] text-slate-400 mb-1">
-                {t.durationLabel} ({t.secondsUnit})
+              <span className="block text-[11px] font-medium text-slate-300 mb-1.5">
+                {lang === 'en' ? 'Custom Resolution (Width × Height)' : 'কাস্টম রেজোলিউশন (প্রস্থ × উচ্চতা)'}
+              </span>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor="override-width" className="block text-[10px] text-slate-400 mb-1">
+                    {t.widthPx}
+                  </label>
+                  <input
+                    id="override-width"
+                    type="number"
+                    min={16}
+                    max={7680}
+                    value={effectiveWidth}
+                    onChange={(e) =>
+                      onChangeManualDimensions(
+                        Math.max(16, Number(e.target.value) || effectiveWidth),
+                        effectiveHeight
+                      )
+                    }
+                    className="w-full rounded-lg border border-white/15 bg-[#0B0D11] px-3 py-1.5 font-mono text-xs text-slate-100 focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="override-height" className="block text-[10px] text-slate-400 mb-1">
+                    {t.heightPx}
+                  </label>
+                  <input
+                    id="override-height"
+                    type="number"
+                    min={16}
+                    max={4320}
+                    value={effectiveHeight}
+                    onChange={(e) =>
+                      onChangeManualDimensions(
+                        effectiveWidth,
+                        Math.max(16, Number(e.target.value) || effectiveHeight)
+                      )
+                    }
+                    className="w-full rounded-lg border border-white/15 bg-[#0B0D11] px-3 py-1.5 font-mono text-xs text-slate-100 focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Duration Presets */}
+            <div>
+              <span className="block text-[11px] font-medium text-slate-300 mb-2">
+                {lang === 'en' ? 'Quick Duration Presets' : 'কুইক ডিউরেশন প্রিসেট'}
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { label: '5s', val: 5 },
+                  { label: '10s', val: 10 },
+                  { label: '15s', val: 15 },
+                  { label: '20s', val: 20 },
+                  { label: '30s', val: 30 },
+                  { label: '60s', val: 60 },
+                ].map((durPreset) => {
+                  const isSelected = Math.abs(effectiveDuration - durPreset.val) < 0.05;
+                  return (
+                    <button
+                      key={durPreset.label}
+                      type="button"
+                      onClick={() => onChangeManualDuration(durPreset.val)}
+                      className={`rounded-lg border px-3 py-1 text-xs font-mono font-medium transition-colors cursor-pointer ${
+                        isSelected
+                          ? 'border-blue-500 bg-blue-500/15 text-blue-300 ring-1 ring-blue-500'
+                          : 'border-white/10 bg-[#0B0D11] text-slate-300 hover:border-white/20 hover:bg-white/5'
+                      }`}
+                    >
+                      {durPreset.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Custom Duration Input */}
+            <div>
+              <label htmlFor="override-duration" className="block text-[11px] font-medium text-slate-300 mb-1">
+                {lang === 'en' ? 'Custom Duration' : 'কাস্টম ডিউরেশন'} ({t.secondsUnit})
               </label>
               <input
                 id="override-duration"
@@ -312,7 +386,7 @@ export function RenderControls({
             <button
               type="button"
               onClick={onResetAuto}
-              className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs text-slate-300 hover:text-white cursor-pointer pt-1"
             >
               <RotateCcw className="h-3.5 w-3.5" aria-hidden="true" />
               <span>{t.resetToDetected}</span>
