@@ -299,7 +299,7 @@ export function detectHtmlDimensions(html: string): DimensionDetectionResult {
   const combinedCss = stripCommentsAndStringsForCss(styleBlocks.join('\n'));
   const ruleRegex = /([^{}]+)\{([^{}]+)\}/g;
   const stageSelectors =
-    /(?:^|[\s,])(?:html|body|:root|\.canvas|#canvas|\.stage|#stage|\.scene|#scene|\.artboard|#artboard|\.container|#container|\.wrapper|#wrapper|\.frame|#frame|\.video|#video|main|#app|\.app|\.banner|\.poster|\.viewport)(?:$|[\s,.:#])/i;
+    /(?:^|[\s,.#_-])(?:html|body|:root|canvas|stage|scene|artboard|container|wrapper|frame|video|viewport|screen|workspace|root|player|display|overlay|poster|banner)(?:$|[\s,.#_-])/i;
 
   for (const match of combinedCss.matchAll(ruleRegex)) {
     const selector = match[1].trim();
@@ -322,7 +322,8 @@ export function detectHtmlDimensions(html: string): DimensionDetectionResult {
 
     if (w >= 200 && h >= 200) {
       const isStageSelector = stageSelectors.test(selector);
-      const priority = isStageSelector ? 90 : 60;
+      // Outer canvas/stage CSS containers get higher priority (92) than inner sub-elements or icon svgs (78-82)
+      const priority = isStageSelector ? 92 : 60;
       candidates.push({
         width: w,
         height: h,
